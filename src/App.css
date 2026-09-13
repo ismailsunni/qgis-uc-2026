@@ -281,6 +281,40 @@
   color: #e8a90c;
 }
 
+/* sessions carried over from an earlier slot */
+.running {
+  margin: 0 0 0.5rem;
+  padding: 0 0 0 0.6rem;
+  border-left: 2px dashed var(--line);
+  list-style: none;
+}
+.running button {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+.running__until {
+  font-variant-numeric: tabular-nums;
+}
+.running__room {
+  color: var(--accent);
+}
+.running__title {
+  flex: 1 1 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* break */
 .break {
   display: flex;

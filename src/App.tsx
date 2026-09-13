@@ -19,7 +19,16 @@ import './App.css'
 const MINE = 'mine'
 
 type Row =
-  | { kind: 'slot'; key: string; label: string; day: string; start: number; events: Event[] }
+  | {
+      kind: 'slot'
+      key: string
+      label: string
+      day: string
+      start: number
+      dayIndex: number
+      events: Event[]
+      running: Event[]
+    }
   | { kind: 'break'; key: string; label: string; start: number; brk: Break }
 
 const statusOf = (e: Event, now: number) =>
@@ -109,8 +118,19 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
           label: e.startLabel,
           day: schedule.days.find((d) => d.index === e.dayIndex)?.label ?? '',
           start: e.start,
+          dayIndex: e.dayIndex,
           events: [e],
+          running: [],
         })
+    }
+
+    // Long sessions (the 90 min workshops) only appear under the time they
+    // start, so list them again as still running under the slots they cover.
+    for (const row of out) {
+      if (row.kind !== 'slot') continue
+      row.running = visible.filter(
+        (e) => e.dayIndex === row.dayIndex && e.start < row.start && e.end > row.start,
+      )
     }
     if (crossDay || filtered) return out
     const breaks: Row[] = (schedule.days.find((d) => d.index === tab)?.breaks ?? []).map((b) => ({
@@ -272,6 +292,22 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
                   {crossDay && <span className="slot__day">{row.day}</span>}
                   {row.label}
                 </h2>
+                {row.running.length > 0 && (
+                  <ul className="running">
+                    {row.running.map((e) => (
+                      <li key={e.code}>
+                        <button onClick={() => setSelected(e)}>
+                          <span className="running__until">until {e.endLabel}</span>
+                          <span className="running__room">{e.room}</span>
+                          <span className="running__title">
+                            {favorites.has(e.code) && '★ '}
+                            {e.title}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {row.events.map((e) => (
                   <EventCard
                     key={e.code}

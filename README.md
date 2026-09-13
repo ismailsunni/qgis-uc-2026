@@ -2,11 +2,12 @@
 
 Mobile-friendly schedule viewer for the [QGIS User Conference 2026](https://talks.osgeo.org/qgis-uc2026/schedule/) (Chur, 5–7 October 2026).
 
-**Live:** https://ismailsunni.github.io/qgis-uc-schedule-viewer/
+**Live:** https://ismailsunni.github.io/qgis-uc-2026/
 
 ## Features
 
 - Day tabs, a sticky hour rail to jump to any time of day, full-text search across all days, and room / track / type filters
+- Long sessions are repeated as a compact "until 11:00 · room · title" line under every later slot they cover, so a 90-minute workshop is not invisible while you browse the half-hour talks
 - Breaks and lunch derived from gaps where every room is idle, shown inline between slots
 - Live clock in conference time (Europe/Zurich) with a **now** marker in the schedule, "Now" badges on running sessions, dimmed past sessions, and a *Jump to now* button
 - Star sessions to build a personal **★ Mine** list, stored in the browser (localStorage) and shown across all days
