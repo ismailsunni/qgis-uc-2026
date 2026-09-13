@@ -346,7 +346,10 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
       )}
 
       <footer className="footer">
-        Data from{' '}
+        <a href="https://uc2026.qgis.org/" target="_blank" rel="noreferrer">
+          Conference website
+        </a>
+        {' · Data from '}
         <a href="https://talks.osgeo.org/qgis-uc2026/schedule/" target="_blank" rel="noreferrer">
           talks.osgeo.org
         </a>

@@ -1,6 +1,6 @@
 # QGIS UC 2026 Schedule Viewer
 
-Mobile-friendly schedule viewer for the [QGIS User Conference 2026](https://talks.osgeo.org/qgis-uc2026/schedule/) (Chur, 5–7 October 2026).
+Mobile-friendly schedule viewer for the [QGIS User Conference 2026](https://uc2026.qgis.org/) (Chur, 5–7 October 2026).
 
 **Live:** https://ismailsunni.github.io/qgis-uc-2026/
 
