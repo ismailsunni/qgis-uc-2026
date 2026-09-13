@@ -29,7 +29,6 @@ export function EventDetail({ event, starred, onToggleStar, onClose }: Props) {
     <div className="sheet__backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <header className="sheet__head">
-          <div className="sheet__grip" />
           <div className="sheet__headrow">
             <span className="sheet__meta">
               {event.startLabel}–{event.endLabel} · {event.room}
@@ -55,10 +54,10 @@ export function EventDetail({ event, starred, onToggleStar, onClose }: Props) {
 
         <footer className="sheet__actions">
           <button
-            className={`btn ${starred ? 'btn--starred' : ''}`}
+            className={`btn btn--star ${starred ? 'btn--starred' : ''}`}
             onClick={() => onToggleStar(event.code)}
           >
-            {starred ? '★ Starred' : '☆ Star this'}
+            {starred ? '★ Starred' : '☆ Star'}
           </button>
           <a className="btn btn--link" href={event.url} target="_blank" rel="noreferrer">
             Open on pretalx ↗

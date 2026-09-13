@@ -398,32 +398,28 @@
   inset: 0;
   z-index: 10;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  /* Backdrop on every side, so a tap anywhere outside closes — including
+     within thumb reach at the bottom. */
+  padding: 10dvh 1rem;
   background: rgba(0, 0, 0, 0.5);
 }
 .sheet {
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* Short of full height, so there is always backdrop left to tap to close. */
-  height: 85dvh;
-  border-radius: 1rem 1rem 0 0;
+  max-width: 640px;
+  height: 100%;
+  border-radius: 1rem;
   background: var(--bg);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   overflow: hidden;
 }
 .sheet__head {
   flex: 0 0 auto;
-  padding: 0.6rem 1.1rem 0.7rem;
+  padding: 0.85rem 1.1rem 0.7rem;
   border-bottom: 1px solid var(--line);
-}
-/* grab bar, hinting the sheet can be dismissed */
-.sheet__grip {
-  width: 2.5rem;
-  height: 4px;
-  margin: 0 auto 0.5rem;
-  border-radius: 2px;
-  background: var(--line);
 }
 .sheet__headrow {
   display: flex;
@@ -477,12 +473,13 @@
   flex: 0 0 auto;
   display: flex;
   gap: 0.5rem;
-  padding: 0.75rem 1.1rem calc(0.75rem + env(safe-area-inset-bottom));
+  padding: 0.75rem 1.1rem;
   border-top: 1px solid var(--line);
 }
 .btn {
   flex: 1;
   padding: 0.65rem 0.8rem;
+  white-space: nowrap;
   border: 1px solid var(--line);
   border-radius: 0.6rem;
   background: var(--card);
@@ -491,6 +488,9 @@
   text-align: center;
   text-decoration: none;
   cursor: pointer;
+}
+.btn--star {
+  flex: 0 0 auto;
 }
 .btn--starred {
   border-color: #e8a90c;
@@ -515,12 +515,7 @@
     align-items: center;
   }
   .sheet {
-    width: min(640px, 100%);
-    height: min(85vh, 46rem);
-    border-radius: 1rem;
-  }
-  .sheet__grip {
-    display: none;
+    max-height: 46rem;
   }
   .toolbar {
     flex-direction: row;
