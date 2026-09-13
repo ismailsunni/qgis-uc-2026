@@ -365,7 +365,7 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
 
       <footer className="footer">
         <a href="https://uc2026.qgis.org/" target="_blank" rel="noreferrer">
-          Conference website
+          Official QGIS UC 2026 Website
         </a>
         {' · Data from '}
         <a href="https://talks.osgeo.org/qgis-uc2026/schedule/" target="_blank" rel="noreferrer">
