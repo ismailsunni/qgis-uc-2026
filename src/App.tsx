@@ -309,6 +309,9 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
                 <h2 className="slot__label">
                   {crossDay && <span className="slot__day">{row.day}</span>}
                   {row.label}
+                  <span className="slot__count">
+                    {row.events.length} session{row.events.length === 1 ? '' : 's'}
+                  </span>
                 </h2>
                 {row.running.length > 0 && (
                   <ul className="running">
@@ -326,16 +329,18 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
                     ))}
                   </ul>
                 )}
-                {row.events.map((e) => (
-                  <EventCard
-                    key={e.code}
-                    event={e}
-                    starred={favorites.has(e.code)}
-                    status={statusOf(e, now)}
-                    onToggleStar={toggle}
-                    onOpen={setSelected}
-                  />
-                ))}
+                <div className="group">
+                  {row.events.map((e) => (
+                    <EventCard
+                      key={e.code}
+                      event={e}
+                      starred={favorites.has(e.code)}
+                      status={statusOf(e, now)}
+                      onToggleStar={toggle}
+                      onOpen={setSelected}
+                    />
+                  ))}
+                </div>
               </>
             )}
           </section>
@@ -373,7 +378,7 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
         </a>
         {schedule.version && ` · schedule ${schedule.version}`}
         <p className="footer__ping">
-          Bug?{' '}
+          Bug? Idea?{' '}
           <a
             href="https://github.com/ismailsunni/qgis-uc-2026/issues"
             target="_blank"

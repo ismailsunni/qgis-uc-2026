@@ -170,12 +170,28 @@
   padding: 0 1rem;
 }
 .slot__label {
-  margin: 1.1rem 0 0.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 1.1rem 0 0.4rem;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--muted);
   text-transform: uppercase;
+}
+.slot__count {
+  font-weight: 400;
+  letter-spacing: 0;
+  opacity: 0.7;
+  text-transform: none;
+}
+
+/* one panel per time slot, sessions as rows inside it */
+.group {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 .slot__day {
   margin-right: 0.5rem;
@@ -192,22 +208,20 @@
   display: flex;
   align-items: stretch;
   gap: 0.25rem;
-  margin-bottom: 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
   background: var(--card);
-  overflow: hidden;
+}
+.card + .card {
+  border-top: 1px solid var(--line);
 }
 .card--past {
   opacity: 0.55;
 }
 .card--live {
-  border-color: var(--live);
-  box-shadow: 0 0 0 1px var(--live);
+  box-shadow: inset 3px 0 0 var(--live);
 }
 .card__main {
   flex: 1;
-  padding: 0.7rem 0.2rem 0.7rem 0.85rem;
+  padding: 0.6rem 0.2rem 0.6rem 0.85rem;
   border: 0;
   background: none;
   color: inherit;
@@ -215,27 +229,30 @@
   text-align: left;
   cursor: pointer;
 }
-.card__time {
+.card__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.78rem;
+  gap: 0.3rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
-.card__dash {
-  opacity: 0.6;
+.card__length {
+  margin-right: 0.1rem;
 }
 .card__title {
-  margin: 0.2rem 0;
-  font-size: 0.98rem;
+  margin: 0.15rem 0;
+  font-size: 0.96rem;
   line-height: 1.35;
 }
-.card__speakers {
-  margin: 0 0 0.4rem;
-  font-size: 0.82rem;
+.card__by {
+  margin: 0;
+  font-size: 0.8rem;
   color: var(--muted);
+}
+.card__room {
+  color: var(--accent);
 }
 .card__tags {
   display: flex;
@@ -254,7 +271,6 @@
   color: var(--accent);
 }
 .badge--type {
-  margin-left: 0.35rem;
   background: rgba(127, 127, 127, 0.16);
 }
 .badge--track {
@@ -262,7 +278,6 @@
   color: #6386dc;
 }
 .badge--live {
-  margin-left: 0.3rem;
   background: var(--live);
   color: #fff;
   font-weight: 600;
