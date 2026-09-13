@@ -82,6 +82,7 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
   const nowRef = useRef<HTMLDivElement>(null)
   const stickyRef = useRef<HTMLDivElement>(null)
   const slotRefs = useRef(new Map<string, HTMLElement>())
+  const locked = useRef<string | null>(null)
 
   // A search reaches across the whole conference, not just the open day.
   const crossDay = tab === MINE || query.trim() !== ''
@@ -153,9 +154,13 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
     return [...first]
   }, [slots])
 
-  const scrollToSlot = (key: string) => {
+  const scrollToSlot = (hour: string, key: string) => {
     const el = slotRefs.current.get(key)
     if (!el) return
+    // Hold the tapped chip until the next real scroll: the last hours of a day
+    // cannot reach the rail, so position alone would highlight a later one.
+    locked.current = hour
+    setActiveHour(hour)
     const offset = (stickyRef.current?.offsetHeight ?? 0) + 8
     scrollTo({ top: el.getBoundingClientRect().top + scrollY - offset, behavior: 'smooth' })
   }
@@ -165,6 +170,13 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
     let frame = 0
     const update = () => {
       frame = 0
+      if (locked.current) return
+      // The last hours can never reach the rail, so once the page bottoms out
+      // the final chip is the honest answer.
+      if (innerHeight + scrollY >= document.body.scrollHeight - 2) {
+        setActiveHour(hours[hours.length - 1]?.[0] ?? null)
+        return
+      }
       const line = (stickyRef.current?.getBoundingClientRect().bottom ?? 0) + 12
       let current = hours[0]?.[0] ?? null
       for (const [hour, key] of hours) {
@@ -176,10 +188,16 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
     const onScroll = () => {
       frame ||= requestAnimationFrame(update)
     }
+    const unlock = () => {
+      locked.current = null
+    }
     update()
     addEventListener('scroll', onScroll, { passive: true })
+    for (const e of ['wheel', 'touchstart', 'keydown'])
+      addEventListener(e, unlock, { passive: true })
     return () => {
       removeEventListener('scroll', onScroll)
+      for (const e of ['wheel', 'touchstart', 'keydown']) removeEventListener(e, unlock)
       cancelAnimationFrame(frame)
     }
   }, [hours])
@@ -234,7 +252,7 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
             hours={hours.map(([hour]) => hour)}
             active={activeHour}
             nowHour={showNowLine ? clockIn(now, offset).slice(0, 2) : null}
-            onPick={(hour) => scrollToSlot(hours.find(([h]) => h === hour)?.[1] ?? '')}
+            onPick={(hour) => scrollToSlot(hour, hours.find(([h]) => h === hour)?.[1] ?? '')}
           />
         )}
       </div>
@@ -354,6 +372,17 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
           talks.osgeo.org
         </a>
         {schedule.version && ` · schedule ${schedule.version}`}
+        <p className="footer__ping">
+          Bug?{' '}
+          <a
+            href="https://github.com/ismailsunni/qgis-uc-2026/issues"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Ping me
+          </a>
+          .
+        </p>
       </footer>
     </div>
   )
