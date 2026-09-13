@@ -40,21 +40,60 @@
   color: var(--muted);
 }
 
-/* tabs */
-.tabs {
+/* tabs + hour rail */
+.sticky {
   position: sticky;
   top: 0;
   z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.tabs {
   display: flex;
   gap: 0.4rem;
   padding: 0.6rem 1rem;
   overflow-x: auto;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
   scrollbar-width: none;
 }
-.tabs::-webkit-scrollbar {
+.tabs::-webkit-scrollbar,
+.rail::-webkit-scrollbar {
   display: none;
+}
+
+.rail {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0 1rem 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.hour {
+  flex: 0 0 auto;
+  position: relative;
+  min-width: 2.4rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.hour--on {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--accent);
+  font-weight: 600;
+}
+.hour__dot {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.25rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--live);
 }
 .tab {
   flex: 0 0 auto;
@@ -178,6 +217,7 @@
 }
 .card__time {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   font-size: 0.78rem;
@@ -212,6 +252,10 @@
 .badge--room {
   background: rgba(88, 166, 116, 0.18);
   color: var(--accent);
+}
+.badge--type {
+  margin-left: 0.35rem;
+  background: rgba(127, 127, 127, 0.16);
 }
 .badge--track {
   background: rgba(99, 134, 220, 0.18);

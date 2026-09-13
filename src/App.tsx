@@ -8,6 +8,7 @@ import {
   type Schedule,
 } from './schedule'
 import { EventCard } from './components/EventCard'
+import { HourRail } from './components/HourRail'
 import { EventDetail } from './components/EventDetail'
 import { Filters } from './components/Filters'
 import { useFavorites } from './useFavorites'
@@ -62,8 +63,11 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState({ room: '', track: '', type: '' })
   const [selected, setSelected] = useState<Event | null>(null)
+  const [activeHour, setActiveHour] = useState<string | null>(null)
   const { favorites, toggle } = useFavorites()
   const nowRef = useRef<HTMLDivElement>(null)
+  const stickyRef = useRef<HTMLDivElement>(null)
+  const slotRefs = useRef(new Map<string, HTMLElement>())
 
   // A search reaches across the whole conference, not just the open day.
   const crossDay = tab === MINE || query.trim() !== ''
@@ -103,6 +107,47 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
     return out
   }, [visible, schedule])
 
+  // One chip per hour that actually has sessions; ambiguous across days, so day view only.
+  const hours = useMemo(() => {
+    const first = new Map<string, string>()
+    for (const s of slots) {
+      const hour = s.label.slice(0, 2)
+      if (!first.has(hour)) first.set(hour, s.key)
+    }
+    return [...first]
+  }, [slots])
+
+  const scrollToSlot = (key: string) => {
+    const el = slotRefs.current.get(key)
+    if (!el) return
+    const offset = (stickyRef.current?.offsetHeight ?? 0) + 8
+    scrollTo({ top: el.getBoundingClientRect().top + scrollY - offset, behavior: 'smooth' })
+  }
+
+  // Highlight the hour whose slot heading sits under the sticky bar.
+  useEffect(() => {
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const line = (stickyRef.current?.getBoundingClientRect().bottom ?? 0) + 12
+      let current = hours[0]?.[0] ?? null
+      for (const [hour, key] of hours) {
+        const el = slotRefs.current.get(key)
+        if (el && el.getBoundingClientRect().top <= line) current = hour
+      }
+      setActiveHour(current)
+    }
+    const onScroll = () => {
+      frame ||= requestAnimationFrame(update)
+    }
+    update()
+    addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [hours])
+
   const onConferenceDay = schedule.days.some((d) => d.date === todayKey)
   const showNowLine =
     onConferenceDay &&
@@ -129,7 +174,8 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
         </p>
       </header>
 
-      <nav className="tabs">
+      <div className="sticky" ref={stickyRef}>
+        <nav className="tabs">
         {schedule.days.map((d) => (
           <button
             key={d.index}
@@ -145,8 +191,17 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
           onClick={() => setTab(MINE)}
         >
           ★ Mine{favorites.size > 0 && <span className="tab__count">{favorites.size}</span>}
-        </button>
-      </nav>
+          </button>
+        </nav>
+        {!crossDay && hours.length > 1 && (
+          <HourRail
+            hours={hours.map(([hour]) => hour)}
+            active={activeHour}
+            nowHour={showNowLine ? clockIn(now, offset).slice(0, 2) : null}
+            onPick={(hour) => scrollToSlot(hours.find(([h]) => h === hour)?.[1] ?? '')}
+          />
+        )}
+      </div>
 
       <div className="toolbar">
         <input
@@ -176,7 +231,14 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
         )}
 
         {slots.map((slot, i) => (
-          <section key={slot.key} className="slot">
+          <section
+            key={slot.key}
+            className="slot"
+            ref={(el) => {
+              if (el) slotRefs.current.set(slot.key, el)
+              else slotRefs.current.delete(slot.key)
+            }}
+          >
             {i === nowIndex && <NowLine ref={nowRef} label={clockIn(now, offset)} />}
             <h2 className="slot__label">
               {crossDay && <span className="slot__day">{slot.day}</span>}

@@ -10,6 +10,8 @@ type Props = {
 
 export function EventCard({ event, starred, status, onToggleStar, onOpen }: Props) {
   const speakers = event.persons.map((p) => p.public_name || p.name).join(', ')
+  // Some tracks just restate the type ("Short Workshop (90min)") — no point showing both.
+  const track = event.track?.startsWith(event.type) ? null : event.track
   return (
     <article className={`card card--${status}`}>
       <button className="card__main" onClick={() => onOpen(event)}>
@@ -17,14 +19,14 @@ export function EventCard({ event, starred, status, onToggleStar, onOpen }: Prop
           <span>{event.startLabel}</span>
           <span className="card__dash">–</span>
           <span>{event.endLabel}</span>
+          <span className="badge badge--type">{event.type}</span>
           {status === 'live' && <span className="badge badge--live">Now</span>}
         </div>
         <h3 className="card__title">{event.title}</h3>
         {speakers && <p className="card__speakers">{speakers}</p>}
         <div className="card__tags">
           <span className="badge badge--room">{event.room}</span>
-          <span className="badge">{event.type}</span>
-          {event.track && <span className="badge badge--track">{event.track}</span>}
+          {track && <span className="badge badge--track">{track}</span>}
         </div>
       </button>
       <button
