@@ -29,6 +29,7 @@ export function EventDetail({ event, starred, onToggleStar, onClose }: Props) {
     <div className="sheet__backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <header className="sheet__head">
+          <div className="sheet__grip" />
           <div className="sheet__headrow">
             <span className="sheet__meta">
               {event.startLabel}–{event.endLabel} · {event.room}
@@ -47,17 +48,6 @@ export function EventDetail({ event, starred, onToggleStar, onClose }: Props) {
             <span className="badge badge--type">{event.type}</span>
             {event.track && <span className="badge badge--track">{event.track}</span>}
           </div>
-
-          {event.persons.some((p) => p.avatar) && (
-            <ul className="speakers">
-              {event.persons.map((p) => (
-                <li key={p.code}>
-                  {p.avatar && <img src={p.avatar} alt="" loading="lazy" />}
-                  <span>{p.public_name || p.name}</span>
-                </li>
-              ))}
-            </ul>
-          )}
 
           {event.abstract && <p className="sheet__abstract">{event.abstract}</p>}
           {event.description && <p className="sheet__description">{event.description}</p>}
