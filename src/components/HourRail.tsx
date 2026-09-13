@@ -10,11 +10,16 @@ type Props = {
 export function HourRail({ hours, active, nowHour, onPick }: Props) {
   const ref = useRef<HTMLDivElement>(null)
 
-  // Keep the active chip in view while scrolling the list.
+  // Centre the active chip. Scrolled by hand rather than via scrollIntoView,
+  // which would also drag the page vertically mid-jump.
   useEffect(() => {
-    ref.current
-      ?.querySelector('.hour--on')
-      ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+    const rail = ref.current
+    const chip = rail?.querySelector<HTMLElement>('.hour--on')
+    if (!rail || !chip) return
+    rail.scrollTo({
+      left: chip.offsetLeft - rail.clientWidth / 2 + chip.clientWidth / 2,
+      behavior: 'smooth',
+    })
   }, [active])
 
   return (

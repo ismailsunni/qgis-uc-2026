@@ -4,6 +4,7 @@ import {
   confOffset,
   dateKeyIn,
   fetchSchedule,
+  type Break,
   type Event,
   type Schedule,
 } from './schedule'
@@ -16,6 +17,10 @@ import { useNow } from './useNow'
 import './App.css'
 
 const MINE = 'mine'
+
+type Row =
+  | { kind: 'slot'; key: string; label: string; day: string; start: number; events: Event[] }
+  | { kind: 'break'; key: string; label: string; start: number; brk: Break }
 
 const statusOf = (e: Event, now: number) =>
   now >= e.end ? 'past' : now >= e.start ? 'live' : 'upcoming'
@@ -71,6 +76,7 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
 
   // A search reaches across the whole conference, not just the open day.
   const crossDay = tab === MINE || query.trim() !== ''
+  const filtered = Boolean(filters.room || filters.track || filters.type)
 
   const visible = useMemo(() => {
     const all = schedule.days.flatMap((d) => d.events)
@@ -88,15 +94,17 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
       .sort((a, b) => a.start - b.start || a.room.localeCompare(b.room))
   }, [schedule, tab, favorites, query, filters])
 
-  // Group into time slots so parallel sessions line up under one heading.
+  // Group into time slots so parallel sessions line up under one heading,
+  // with the day's breaks interleaved (day view only — no filtering applied).
   const slots = useMemo(() => {
-    const out: { key: string; label: string; day: string; start: number; events: Event[] }[] = []
+    const out: Row[] = []
     for (const e of visible) {
       const key = `${e.date.slice(0, 10)}-${e.startLabel}`
       const last = out[out.length - 1]
-      if (last?.key === key) last.events.push(e)
+      if (last?.kind === 'slot' && last.key === key) last.events.push(e)
       else
         out.push({
+          kind: 'slot',
           key,
           label: e.startLabel,
           day: schedule.days.find((d) => d.index === e.dayIndex)?.label ?? '',
@@ -104,8 +112,16 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
           events: [e],
         })
     }
-    return out
-  }, [visible, schedule])
+    if (crossDay || filtered) return out
+    const breaks: Row[] = (schedule.days.find((d) => d.index === tab)?.breaks ?? []).map((b) => ({
+      kind: 'break',
+      key: b.key,
+      label: b.startLabel,
+      start: b.start,
+      brk: b,
+    }))
+    return [...out, ...breaks].sort((a, b) => a.start - b.start)
+  }, [visible, schedule, crossDay, filtered, tab])
 
   // One chip per hour that actually has sessions; ambiguous across days, so day view only.
   const hours = useMemo(() => {
@@ -230,30 +246,44 @@ function ScheduleView({ schedule, stale }: { schedule: Schedule; stale: boolean 
           </p>
         )}
 
-        {slots.map((slot, i) => (
+        {slots.map((row, i) => (
           <section
-            key={slot.key}
+            key={row.key}
             className="slot"
             ref={(el) => {
-              if (el) slotRefs.current.set(slot.key, el)
-              else slotRefs.current.delete(slot.key)
+              if (el) slotRefs.current.set(row.key, el)
+              else slotRefs.current.delete(row.key)
             }}
           >
             {i === nowIndex && <NowLine ref={nowRef} label={clockIn(now, offset)} />}
-            <h2 className="slot__label">
-              {crossDay && <span className="slot__day">{slot.day}</span>}
-              {slot.label}
-            </h2>
-            {slot.events.map((e) => (
-              <EventCard
-                key={e.code}
-                event={e}
-                starred={favorites.has(e.code)}
-                status={statusOf(e, now)}
-                onToggleStar={toggle}
-                onOpen={setSelected}
-              />
-            ))}
+            {row.kind === 'break' ? (
+              <div
+                className={`break ${now >= row.brk.start && now < row.brk.end ? 'break--live' : ''}`}
+              >
+                <span className="break__time">
+                  {row.brk.startLabel} – {row.brk.endLabel}
+                </span>
+                <span className="break__name">{row.brk.name}</span>
+                <span className="break__len">{row.brk.minutes} min</span>
+              </div>
+            ) : (
+              <>
+                <h2 className="slot__label">
+                  {crossDay && <span className="slot__day">{row.day}</span>}
+                  {row.label}
+                </h2>
+                {row.events.map((e) => (
+                  <EventCard
+                    key={e.code}
+                    event={e}
+                    starred={favorites.has(e.code)}
+                    status={statusOf(e, now)}
+                    onToggleStar={toggle}
+                    onOpen={setSelected}
+                  />
+                ))}
+              </>
+            )}
           </section>
         ))}
         {showNowLine && nowIndex === -1 && slots.length > 0 && (

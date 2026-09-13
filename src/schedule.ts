@@ -23,7 +23,24 @@ export type Event = {
   dayIndex: number
 }
 
-export type Day = { index: number; date: string; label: string; events: Event[] }
+export type Break = {
+  key: string
+  start: number
+  end: number
+  startLabel: string
+  endLabel: string
+  name: string
+  minutes: number
+  dayIndex: number
+}
+
+export type Day = {
+  index: number
+  date: string
+  label: string
+  events: Event[]
+  breaks: Break[]
+}
 
 export type Schedule = {
   title: string
@@ -66,6 +83,36 @@ type RawFeed = {
   }
 }
 
+const MIN_BREAK = 15 * 60_000
+
+/**
+ * Pretalx publishes no break entries, so treat any stretch where every room is
+ * idle as a break. A long midday one is lunch.
+ */
+function findBreaks(events: Event[], dayIndex: number): Break[] {
+  const breaks: Break[] = []
+  let covered = -Infinity
+  for (const e of events) {
+    if (covered > -Infinity && e.start - covered >= MIN_BREAK) {
+      const offset = offsetOf(e.date)
+      const minutes = Math.round((e.start - covered) / 60_000)
+      const midday = Number(hhmm(covered, offset).slice(0, 2))
+      breaks.push({
+        key: `break-${covered}`,
+        start: covered,
+        end: e.start,
+        startLabel: hhmm(covered, offset),
+        endLabel: hhmm(e.start, offset),
+        name: minutes >= 45 && midday >= 11 && midday <= 14 ? 'Lunch' : 'Break',
+        minutes,
+        dayIndex,
+      })
+    }
+    covered = Math.max(covered, e.end)
+  }
+  return breaks
+}
+
 export function parseSchedule(input: unknown): Schedule {
   const raw = input as RawFeed
   const conf = raw.schedule.conference
@@ -103,6 +150,7 @@ export function parseSchedule(input: unknown): Schedule {
       date: day.date,
       label: dayLabel(day.date),
       events,
+      breaks: findBreaks(events, day.index),
     }
   })
 
