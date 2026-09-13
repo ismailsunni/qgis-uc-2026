@@ -13,7 +13,7 @@ Mobile-friendly schedule viewer for the [QGIS User Conference 2026](https://talk
 - Star sessions to build a personal **★ Mine** list, stored in the browser (localStorage) and shown across all days
 - Session details with abstract, speakers, and a link to pretalx
 - Reads the live pretalx feed, falling back to a deployed snapshot if the feed is unreachable
-- Light/dark theme, no tracking, no backend
+- Light/dark theme, no backend; page views only, via Umami (cookieless, no personal data)
 
 ## Development
 
